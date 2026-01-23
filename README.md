@@ -7,6 +7,9 @@ This repository contains:
 - a React + shadcn/Tailwind dashboard in `src/` that connects to the server, listens to SSE events, and shows charts (Recharts)
 - a Bun-built SQLite database (stored as `simulations.sqlite`)
 
+<img width="3473" height="2112" alt="image" src="https://github.com/user-attachments/assets/d0f95978-e48d-499d-9775-12cdbe4e66f4" />
+
+
 ## ✴️ Quick start
 
 1. Make sure your `push_swap` and `checker_linux` executables are present in the current directory and are executable.
