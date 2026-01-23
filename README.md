@@ -7,75 +7,40 @@ This repository contains:
 - a React + shadcn/Tailwind dashboard in `src/` that connects to the server, listens to SSE events, and shows charts (Recharts)
 - a Bun-built SQLite database (stored as `simulations.sqlite`)
 
-## Quick start (development)
-1. Install dependencies with Bun (requires Bun installed):
+## ✴️ Quick start
 
+1. Make sure your `push_swap` and `checker_linux` executables are present in the current directory and are executable.
+	```bash
+	chmod +x push_swap checker_linux
+	```
+2. Pull the Docker image with Bun installed:
+	```bash
+	docker pull ghcr.io/caesarovich/push-swap-bench:master
+	```
+3. Run the Docker container, mounting the current directory:
+	```bash
+	docker run -it --rm -p 3000:3000 \
+		-v $(pwd)/push_swap:/app/push_swap \
+		-v $(pwd)/checker_linux:/app/checker \
+		-v $(pwd)/benchmark_data:/app/data \
+		ghcr.io/caesarovich/push-swap-bench:master
+	```
+4. Open your browser and navigate to `http://localhost:3000`. You should see the dashboard.
+5. Configure simulation parameters (number of simulations, size of stacks, ...) and start the simulations.
+6. Watch the live-updating charts as simulations run.
+
+## 🛑 Stopping the server
+To stop the server, simply press `Ctrl+C` in the terminal where the Docker container is running.
+
+## 🗑 Cleaning up
+To remove the generated SQLite database and any other data, delete the `benchmark_data` directory:
 ```bash
-bun install
+rm -rf benchmark_data
 ```
 
-2. Make sure your `push_swap` and `checker` binaries are present and executable in the project root (or provide custom paths when starting simulations):
-
+To remove the Docker image, run:
 ```bash
-chmod +x ./push_swap ./checker
+docker rmi ghcr.io/caesarovich/push-swap-bench:master
 ```
 
-3. Start the dev server (hot reload):
-
-```bash
-bun run dev
-```
-
-Open http://localhost:3000/ — the dashboard will load.
-
-How to use the dashboard
-- Top controls: set Min/Max length, Iterations and Concurrency. Click Start to begin simulations. Click Stop to cancel.
-- Progress bar and status show live activity from the simulator.
-- The main chart shows Min/Avg/Max operations per length. You can toggle the right-side drawer (desktop) / bottom sheet (mobile) to view raw Events and Recent Results.
-- Use the Export button to download a CSV of all results; Reset clears the DB (irreversible) after confirmation.
-- Theme toggle (sun/moon) persists your preference to localStorage.
-
-Notes & troubleshooting
-- Permission denied spawning `./checker` or `./push_swap`: make the binary executable (see `chmod +x ...`) and ensure the path is correct.
-- Port 3000 in use: stop the process using it, or change port in `src/index.ts` if you prefer another port.
-- If SSE connection looks stale in the browser, reload the page — EventSource will reconnect automatically in many cases.
-- Theoretical complexity overlays: the chart contains optional theoretical curves (O(n log n), O(n sqrt n), O(n^2)). By default they are presented in a readable, scaled way; you can toggle or adjust visualization code in `src/Dashboard.tsx`.
-
-Database
-- The app writes to `./simulations.sqlite` next to the project root. You can open it with any SQLite client.
-
-## Docker usage
-### Option 1 - Build and run with docker-compose (recommended):
-
-```bash
-docker compose up --build -d
-```
-
-This will:
-- build an image using the included `Dockerfile` (based on Bun),
-- mount your local repository into the container so code edits are visible inside the container,
-- mount `./push_swap` and `./checker` into the container at `/app/push_swap` and `/app/checker` (these should be executable binaries on the host),
-- expose port 3000 to the host so you can open http://localhost:3000.
-
-### Option 2 - Run with `docker run` and volumes
-
-If you prefer a single `docker run` command, here's an example that mounts host binaries and a local data folder into the container:
-
-```bash
-# build image
-docker build -t push-swap-bench:latest .
-
-# run container, mount binaries and persist data
-docker run -d \
-	-p 3000:3000 \
-	-v $(pwd)/push_swap:/app/push_swap:ro \
-	-v $(pwd)/checker:/app/checker:ro \
-	-v $(pwd)/data:/app/data \
-	--name push-swap-bench push-swap-bench:latest
-```
-
-Notes:
-- Make sure `./push_swap` and `./checker` exist and are executable on the host before starting the container. The container expects them at `/app/push_swap` and `/app/checker` according to the compose/run examples.
-- The `data` volume (or `./data` host folder) will persist `simulations.sqlite` and other files produced by the app.
-
-Enjoy!
+Enjoy 🩵
