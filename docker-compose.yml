@@ -3,8 +3,8 @@ version: '3.8'
 services:
   app:
     build: .
-    image: push_swap_plotter:latest
-    container_name: push_swap_plotter
+    image: push-swap-bench:latest
+    container_name: push-swap-bench
     ports:
       - "3000:3000"
     environment:

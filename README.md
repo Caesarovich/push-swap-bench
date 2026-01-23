@@ -1,4 +1,4 @@
-# push_swap Plotter
+# push-swap-bench
 
 A small Bun + React dashboard to run large-scale push_swap simulations, collect statistics in SQLite, and visualize results live.
 
@@ -63,7 +63,7 @@ If you prefer a single `docker run` command, here's an example that mounts host 
 
 ```bash
 # build image
-docker build -t push_swap_plotter:latest .
+docker build -t push-swap-bench:latest .
 
 # run container, mount binaries and persist data
 docker run -d \
@@ -71,7 +71,7 @@ docker run -d \
 	-v $(pwd)/push_swap:/app/push_swap:ro \
 	-v $(pwd)/checker:/app/checker:ro \
 	-v $(pwd)/data:/app/data \
-	--name push_swap_plotter push_swap_plotter:latest
+	--name push-swap-bench push-swap-bench:latest
 ```
 
 Notes:

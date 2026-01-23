@@ -10,7 +10,7 @@ export function App() {
           <CardHeader className="mb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl font-bold">push_swap Plotter</CardTitle>
+                <CardTitle className="text-2xl font-bold">push-swap Bench</CardTitle>
                 <div className="text-sm text-muted-foreground">Run simulations and view live statistics — chart focused</div>
               </div>
             </div>
