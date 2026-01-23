@@ -1,0 +1,55 @@
+@import "../styles/globals.css";
+
+@layer base {
+  :root {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  body {
+    /* full-bleed modern dark theme */
+    min-width: 320px;
+    min-height: 100vh;
+    position: relative;
+    margin: 0;
+    background: linear-gradient(135deg, #0f1724 0%, #111827 50%, #1f2937 100%);
+    color: #e6edf3;
+  }
+}
+
+/* cool Bun background animation 😎 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.06;
+  background: radial-gradient(ellipse at 10% 10%, rgba(124,58,237,0.06), transparent 8%), radial-gradient(ellipse at 90% 90%, rgba(16,185,129,0.04), transparent 12%);
+  background-blend-mode: screen;
+  pointer-events: none;
+}
+
+@keyframes slide {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 256px 224px;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion) {
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+  }
+}
