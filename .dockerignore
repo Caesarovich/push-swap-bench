@@ -1,0 +1,17 @@
+node_modules
+dist
+out
+*.tgz
+*.log
+coverage
+.git
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+simulations*
+tmp
+temp
+.DS_Store
+.vscode
+bun.lockb
+.bun

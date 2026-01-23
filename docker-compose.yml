@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: push_swap_plotter:latest
+    container_name: push_swap_plotter
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    # mount your local binaries into the container (read-only)
+    volumes:
+      - ./:/app:cached
+      - ./push_swap:/app/push_swap:ro
+      - ./checker:/app/checker:ro
+      - data:/app/data
+    command: ["bun", "run", "start"]
+
+volumes:
+  data:
+    driver: local
