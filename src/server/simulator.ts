@@ -173,7 +173,9 @@ export async function startSimulation(opts: Options = {}) {
           new Promise((_, rej) => setTimeout(() => rej(new Error("checker timeout")), tmo)),
         ]);
 
-        const valid = ch.exitCode === 0;
+		// Output must be "OK" or "KO"
+		const chOutPromise = new Response(ch.stdout).text();
+        const valid = ((await chOutPromise.catch(() => "")).trim() === "OK");
         const ops = (psOut || "").split(/\r?\n/).filter(Boolean).length;
         const runtime_ms = Date.now() - t0;
 
