@@ -1,5 +1,6 @@
 import { insertResult } from "./db";
 import fs from "fs";
+import os from "os";
 
 type Options = {
   pushSwapPath?: string;
@@ -16,6 +17,7 @@ type Options = {
 
 let running = false;
 let stopRequested = false;
+let lastProgressLog = 0;
 const subscribers = new Set<(payload: any) => void>();
 const activeChildren = new Set<any>();
 
@@ -60,9 +62,9 @@ export async function startSimulation(opts: Options = {}) {
     minLength = 3,
     maxLength = 10,
     iterations = 100,
-    concurrency = 2,
+    concurrency = os.cpus().length * 2,
     delayMs = 0,
-    timeoutMs = 10_000,
+    timeoutMs = 60_000,
     maxTotalJobs = 100_000,
     retries = 1,
   } = opts;
@@ -112,6 +114,11 @@ export async function startSimulation(opts: Options = {}) {
     broadcast({ type: "stopped", total: 0, reason: "no-jobs" });
     return;
   }
+
+  // Reset progress logging timer
+  lastProgressLog = 0;
+  console.log(`[Simulation] Starting with ${jobs.length} jobs (lengths ${minL}-${maxL}, ${iters} iterations each)`);
+
 
   function killChild(c: any) {
     try {
@@ -188,6 +195,15 @@ export async function startSimulation(opts: Options = {}) {
         }
 
         total++;
+        
+        // Periodically log completion percentage (every 5 seconds)
+        const now = Date.now();
+        if (now - lastProgressLog > 5000) {
+          const percent = ((total / jobs.length) * 100).toFixed(1);
+          console.log(`[Simulation] Progress: ${total}/${jobs.length} jobs completed (${percent}%)`);
+          lastProgressLog = now;
+        }
+        
         broadcast({ type: "progress", total, job: job.id, attempt, last: { length: job.length, operations: ops, valid, runtime_ms } });
 
         // finished successfully, break retry loop
@@ -200,8 +216,8 @@ export async function startSimulation(opts: Options = {}) {
         if (attempt > maxRetries) {
           broadcast({ type: "job-failed", job: job.id, attempts: attempt });
         } else {
-          // small backoff before retrying
-          await new Promise((r) => setTimeout(r, 200 * attempt));
+          // Re-queue the job for retry instead of blocking
+          jobQueue.push({ ...job, attempts: attempt });
         }
       } finally {
         if (ps) activeChildren.delete(ps);
@@ -210,9 +226,19 @@ export async function startSimulation(opts: Options = {}) {
     }
   }
 
+  const jobQueue: { id: number; length: number; seq?: number[]; attempts?: number }[] = [...jobs];
+  let jobIndex = 0;
+
+  function getNextJob() {
+    if (jobIndex < jobQueue.length) {
+      return jobQueue[jobIndex++];
+    }
+    return null;
+  }
+
   const worker = async () => {
     while (!stopRequested) {
-      const job = jobs.shift();
+      const job = getNextJob();
       if (!job) break;
       await runJob(job);
       if (delay) await new Promise((r) => setTimeout(r, delay));
@@ -237,6 +263,9 @@ export async function startSimulation(opts: Options = {}) {
   }
 
   running = false;
+  const percent = ((total / jobs.length) * 100).toFixed(1);
+  const status = stopRequested ? "STOPPED" : "COMPLETED";
+  console.log(`[Simulation] ${status}: ${total}/${jobs.length} jobs (${percent}%)`);
   broadcast({ type: "stopped", total });
 }
 
